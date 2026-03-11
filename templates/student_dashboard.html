@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Fee Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Fee Management System</span>
+        </div>
+        <div class="nav-user">
+            <span class="user-name"><i class="fas fa-user"></i> {{ session.user_name }}</span>
+            <span class="badge student-badge">Student</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Welcome Card -->
+        <div class="welcome-card">
+            <h2>Welcome, {{ student.Name }}!</h2>
+            <p>Student ID: {{ student.Student_ID }} | Email: {{ student.Email }}</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-icon blue">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>₹{{ student.Fee or '0' }}</h3>
+                    <p>Total Course Fee</p>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon green">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>₹{% if payments %}{{ payments|sum(attribute='Amount_Paid') }}{% else %}0{% endif %}</h3>
+                    <p>Total Paid</p>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{% if installments %}{{ installments|selectattr('Status', 'equalto', 'Pending')|list|length }}{% else %}0{% endif %}</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Details -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-user"></i> Personal Details</h3>
+            </div>
+            <div class="card-body">
+                <table class="info-table">
+                    <tr>
+                        <td>Full Name:</td>
+                        <td>{{ student.Name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Email:</td>
+                        <td>{{ student.Email }}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone:</td>
+                        <td>{{ student.Phone or 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Course:</td>
+                        <td>{{ student.Course_Name or 'Not assigned' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td><span class="badge success-badge">{{ student.Status }}</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-history"></i> Payment History</h3>
+            </div>
+            <div class="card-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Installment</th>
+                            <th>Amount</th>
+                            <th>Mode</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if payments %}
+                            {% for p in payments %}
+                            <tr>
+                                <td>{{ p.Payment_Date }}</td>
+                                <td>{{ p.Installment_No }}</td>
+                                <td>₹{{ p.Amount_Paid }}</td>
+                                <td>{{ p.Payment_Mode }}</td>
+                                <td>₹{{ p.Remaining_Balance }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No payment records found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Installment Schedule -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-calendar"></i> Installment Schedule</h3>
+            </div>
+            <div class="card-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Installment</th>
+                            <th>Due Date</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Fine</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if installments %}
+                            {% for i in installments %}
+                            <tr>
+                                <td>{{ i.Installment_No }}</td>
+                                <td>{{ i.Due_Date }}</td>
+                                <td>₹{{ i.Installment_Amount }}</td>
+                                <td>₹{{ i.Paid_Amount }}</td>
+                                <td>₹{{ i.Fine_Amount }}</td>
+                                <td>
+                                    <span class="badge {% if i.Status == 'Paid' %}success-badge{% else %}warning-badge{% endif %}">
+                                        {{ i.Status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No installment records found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Scholarship Details -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-award"></i> Scholarship Details</h3>
+    </div>
+    <div class="card-body">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Applied</th>
+                    <th>Eligibility</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Amount Released</th>
+                    <th>Approval Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if scholarship %}
+                <tr>
+                    <td>{{ scholarship.Applied }}</td>
+                    <td>{{ scholarship.Eligibility }}</td>
+                    <td>{{ scholarship.Percentage }}%</td>
+                    <td>
+                        <span class="badge {% if scholarship.Approval_Status == 'Approved' %}success-badge{% else %}warning-badge{% endif %}">
+                            {{ scholarship.Approval_Status }}
+                        </span>
+                    </td>
+                    <td>₹{{ scholarship.Amount_Released }}</td>
+                    <td>{{ scholarship.Approval_Date or 'Pending' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No scholarship record found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    </div>
+
+    
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

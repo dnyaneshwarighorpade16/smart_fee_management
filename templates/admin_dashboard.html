@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+
+<body class="admin-dashboard">
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+<div class="nav-brand">
+<i class="fas fa-university"></i>
+<span>Fee Management System</span>
+</div>
+
+<div class="nav-user">
+
+<span class="user-name">
+<i class="fas fa-user"></i>
+{{ session.user_name }}
+</span>
+
+<span class="badge admin-badge">Admin</span>
+
+<a href="{{ url_for('logout') }}" class="logout-btn">
+<i class="fas fa-sign-out-alt"></i>
+Logout
+</a>
+
+</div>
+
+</nav>
+
+
+<div class="container">
+
+<!-- STATS -->
+
+<div class="stats-row">
+
+<div class="stat-box">
+<div class="stat-icon blue"><i class="fas fa-users"></i></div>
+<div class="stat-info">
+<h3>{{ total_students }}</h3>
+<p>Total Students</p>
+</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-icon green"><i class="fas fa-book"></i></div>
+<div class="stat-info">
+<h3>{{ total_courses }}</h3>
+<p>Total Courses</p>
+</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-icon orange"><i class="fas fa-rupee-sign"></i></div>
+<div class="stat-info">
+<h3>₹{{ total_collections }}</h3>
+<p>Total Collections</p>
+</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-icon red"><i class="fas fa-clock"></i></div>
+<div class="stat-info">
+<h3>{{ pending_installments }}</h3>
+<p>Pending Installments</p>
+</div>
+</div>
+
+</div>
+
+
+<!-- ACTION BUTTONS -->
+
+<div class="action-row">
+
+<button class="action-btn" onclick="showTab('students')">
+<i class="fas fa-users"></i> Students
+</button>
+
+<button class="action-btn" onclick="showTab('courses')">
+<i class="fas fa-book"></i> Courses
+</button>
+
+<button class="action-btn" onclick="showTab('payments')">
+<i class="fas fa-credit-card"></i> Payments
+</button>
+
+<button class="action-btn" onclick="showTab('installments')">
+<i class="fas fa-calendar"></i> Installments
+</button>
+
+</div>
+
+
+<!-- STUDENTS TAB -->
+
+<div id="students" class="tab active">
+
+<div class="card">
+
+<div class="card-header">
+
+<h3><i class="fas fa-users"></i> Students</h3>
+
+<button class="add-btn" onclick="showAddStudent()">
+<i class="fas fa-plus"></i> Add Student
+</button>
+
+</div>
+
+<div class="card-body">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Course</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for s in students %}
+<tr>
+<td>{{ s.Student_ID }}</td>
+<td>{{ s.Name }}</td>
+<td>{{ s.Email }}</td>
+<td>{{ s.Phone }}</td>
+<td>{{ s.Course_Name }}</td>
+<td>{{ s.Status }}</td>
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- COURSES TAB -->
+
+<div id="courses" class="tab">
+
+<div class="card">
+
+<div class="card-header">
+
+<h3><i class="fas fa-book"></i> Courses</h3>
+
+<button class="add-btn" onclick="showAddCourse()">
+<i class="fas fa-plus"></i> Add Course
+</button>
+
+</div>
+
+<div class="card-body">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Fee</th>
+<th>Duration</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for c in courses %}
+<tr>
+<td>{{ c.Course_ID }}</td>
+<td>{{ c.Course_Name }}</td>
+<td>₹{{ c.Fee }}</td>
+<td>{{ c.Duration }}</td>
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- PAYMENTS TAB -->
+
+<div id="payments" class="tab">
+
+<div class="card">
+
+<div class="card-header">
+
+<h3><i class="fas fa-credit-card"></i> Payments</h3>
+
+<button class="add-btn" onclick="showAddPayment()">
+<i class="fas fa-plus"></i> Add Payment
+</button>
+
+</div>
+
+<div class="card-body">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Student</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Mode</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for p in payments %}
+<tr>
+<td>{{ p.Payment_ID }}</td>
+<td>{{ p.Student_Name }}</td>
+<td>₹{{ p.Amount_Paid }}</td>
+<td>{{ p.Payment_Date }}</td>
+<td>{{ p.Payment_Mode }}</td>
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- INSTALLMENTS TAB -->
+
+<div id="installments" class="tab">
+
+<div class="card">
+
+<div class="card-header">
+
+<h3><i class="fas fa-calendar"></i> Installments</h3>
+
+<button class="add-btn" onclick="showAddInstallment()">
+<i class="fas fa-plus"></i> Add Installment
+</button>
+
+</div>
+
+<div class="card-body">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Student</th>
+<th>No</th>
+<th>Due Date</th>
+<th>Amount</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for i in installments %}
+<tr>
+<td>{{ i.Installment_ID }}</td>
+<td>{{ i.Student_Name }}</td>
+<td>{{ i.Installment_No }}</td>
+<td>{{ i.Due_Date }}</td>
+<td>₹{{ i.Installment_Amount }}</td>
+<td>{{ i.Status }}</td>
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- ADD STUDENT -->
+
+<div id="studentModal" class="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h3><i class="fas fa-user-plus"></i> Add Student</h3>
+<span class="close" onclick="closeModal('studentModal')">&times;</span>
+</div>
+
+<div class="modal-body">
+
+<form method="POST" action="{{ url_for('add_student') }}">
+
+<div class="form-group">
+<input type="text" name="name" placeholder="Student Name" required>
+</div>
+
+<div class="form-group">
+<input type="email" name="email" placeholder="Email" required>
+</div>
+
+<div class="form-group">
+<input type="password" name="password" placeholder="Password" required>
+</div>
+
+<div class="form-group">
+<input type="text" name="phone" placeholder="Phone">
+</div>
+
+<div class="form-group">
+
+<select name="course_id" required>
+
+<option value="">Select Course</option>
+
+{% for c in courses %}
+<option value="{{ c.Course_ID }}">{{ c.Course_Name }}</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<button type="submit" class="submit-btn">Add Student</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD COURSE -->
+
+<div id="courseModal" class="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h3><i class="fas fa-book"></i> Add Course</h3>
+<span class="close" onclick="closeModal('courseModal')">&times;</span>
+</div>
+
+<div class="modal-body">
+
+<form method="POST" action="{{ url_for('add_course') }}">
+
+<div class="form-group">
+<input type="text" name="course_name" placeholder="Course Name" required>
+</div>
+
+<div class="form-group">
+<input type="number" name="fee" placeholder="Course Fee" required>
+</div>
+
+<div class="form-group">
+<input type="number" name="duration" placeholder="Duration (months)" required>
+</div>
+
+<button type="submit" class="submit-btn">Add Course</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD PAYMENT -->
+
+<div id="paymentModal" class="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h3><i class="fas fa-credit-card"></i> Add Payment</h3>
+<span class="close" onclick="closeModal('paymentModal')">&times;</span>
+</div>
+
+<div class="modal-body">
+
+<form method="POST" action="{{ url_for('add_payment') }}">
+
+<div class="form-group">
+
+<select name="student_id">
+
+{% for s in students %}
+<option value="{{ s.Student_ID }}">{{ s.Name }}</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="form-group">
+<input type="number" name="installment_no" placeholder="Installment No">
+</div>
+
+<div class="form-group">
+<input type="number" name="amount_paid" placeholder="Amount Paid">
+</div>
+
+<div class="form-group">
+<input type="date" name="payment_date">
+</div>
+
+<div class="form-group">
+<input type="text" name="payment_mode" placeholder="Payment Mode">
+</div>
+
+<div class="form-group">
+<input type="number" name="remaining_balance" placeholder="Remaining Balance">
+</div>
+
+<button type="submit" class="submit-btn">Add Payment</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD INSTALLMENT -->
+
+<div id="installmentModal" class="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h3><i class="fas fa-calendar"></i> Add Installment</h3>
+<span class="close" onclick="closeModal('installmentModal')">&times;</span>
+</div>
+
+<div class="modal-body">
+
+<form method="POST" action="{{ url_for('add_installment') }}">
+
+<div class="form-group">
+
+<select name="student_id">
+
+{% for s in students %}
+<option value="{{ s.Student_ID }}">{{ s.Name }}</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="form-group">
+<input type="number" name="installment_no" placeholder="Installment No">
+</div>
+
+<div class="form-group">
+<input type="date" name="due_date">
+</div>
+
+<div class="form-group">
+<input type="number" name="installment_amount" placeholder="Installment Amount">
+</div>
+
+<div class="form-group">
+<select name="status">
+<option>Pending</option>
+<option>Paid</option>
+</select>
+</div>
+
+<button type="submit" class="submit-btn">Add Installment</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
